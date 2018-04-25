@@ -1,0 +1,112 @@
+---
+title: "Design HW2"
+author: "Charles"
+date: "2018/03/20"
+output: 
+  html_document:
+     toc: TRUE
+     toc_depth: 5
+     toc_float:
+      collapsed: TRUE
+      smooth_scroll: FALSE
+---
+# 1.Exercise 2.4
+Describe the benefits and risks of using these five methods.
+As part of a larger experiment, Dale (1992) looked at six samples of a wetland soil undergoing a simulated snowmelt. Three were randomly selected for treatment with a neutral pH snowmelt; the other three got a reduced pH snowmelt. The observed response was the number of Copepoda removed from each microcosm during the first 14 days of snowmelt.
+ 
+ - Reduced pH $(256,159,149)$
+ 
+ - Neutral pH $(54,123,248)$
+
+Using randomizationmethods, test the null hypothesis that the two treatments have equal average numbers of Copepoda versus a two-sided alternative.
+
+
+```{r}
+#Permutation test
+#兩試驗樣本數相同下進行
+#原本資料計算
+library(dplyr)
+library(knitr)
+A<-c(256,159,149);A
+B<-c(54,123,247);B
+D<-A[]-B[];D<-matrix(D,ncol = length(A))
+#A與B資料的差異和
+D_sum<-apply(D,1,sum)
+#各種排列數差異和計算
+W<-c(A,B)
+W<-matrix(data = W,ncol =length(W) )
+W_sum<-apply(W,1,sum)
+cb_W<- combn(W,3)
+cb_A_sum<-apply(cb_W,2,sum)
+cb_B_sum=NULL
+n=NULL
+for(i in 1:choose(length(W),length(W)/2)){
+  n=W_sum-cb_A_sum[i]
+  cb_B_sum=c(cb_B_sum,n)
+}
+all_d_sum<-cb_A_sum-cb_B_sum
+#將所有排列差異和按照順序列出
+all_d_sum <- matrix(sort(all_d_sum),ncol = 5,byrow = T)
+print(all_d_sum)
+#畫直方圖
+hist(all_d_sum,breaks = 2000)
+#計算P值(計算有幾種可能使得兩者的差異絕對值不小於觀察差異)
+p_value<-2*sum(1*(D_sum<=all_d_sum)/choose(length(W),length(W)/2))
+p_value
+#統計模擬看看
+W
+s_d=NULL
+P_hat_value=NULL
+sd_p_hat=NULL
+for (j in 1:1000) {
+  s_d=NULL
+  for(i in 1:1000){
+   x <- sample(W,3)
+   sx <- sum(x)
+   sy <- sum(W)-sum(x)
+   sd <- sx-sy
+   s_d=c(s_d,sd)
+}
+p_hat_value <- 2*sum(1*(D_sum<=s_d[-1]))/1000
+P_hat_value = c(P_hat_value,p_hat_value)
+}
+sort(P_hat_value)
+P_hat_value <- sum(P_hat_value)/1000
+sd_p_hat <- (p_hat_value*(1-p_hat_value))/1000
+print(paste('P hat value :' , P_hat_value))
+print(paste('stand error of p hat :' ,sd_p_hat))
+hist(s_d,breaks = 50,main="Histogram of stand error",xlab = "stand error")
+
+```
+
+# 2.$E\left(\widehat{\sigma}^{2}\right )=\sigma^{2}$
+
+We know 
+ 
+&emsp;  $Y_{ij}\sim N(u_i,\sigma^{2})$ , $E(Y_{ij}^2)=u_i^2+\sigma^2$
+ 
+&emsp; $Y_{i.}\sim N(u_{i,}\frac{\sigma^{2}}{n})$ , $E(Y_{i.}^2)=u_i^2+\frac{\sigma^2}{n_i}$
+
+One remaining parameter to estimate is 
+ 
+&emsp;&emsp;&emsp;&emsp; $Var({\epsilon}_{ij})={\sigma}^2 , j=1,2,...,n_i , i=1,2,...,g$
+ 
+Consider
+
+&emsp;&emsp;$\hat{{\sigma}^2}=MS_E=\frac{SS_E}{N-g}=\frac{\sum_{i=1}^{g}\sum_{j=1}^{n_i}(Y_{ij}-\bar{Y}_{i.})^2}{N-g}$
+
+In both the separate means and single means models,$\hat{\sigma}^2$is unbiased for $\sigma^2$,i.e.
+
+ $E(\hat{{\sigma}^2})=E(\frac{\sum_{i=1}^{g}\sum_{j=1}^{n_i}(Y_{ij}-\bar{Y}_{i.})^2}{N-g})$
+
+&emsp;&emsp;&emsp;$=E(\frac{\sum_{i=1}^{g}\sum_{j=1}^{n_i}(Y_{ij}^2-2Y_{ij}\bar{Y}_{i.}+\bar{Y}_{i.}^2))}{N-g}$
+
+&emsp;&emsp;&emsp; $=E(\frac{\sum_{i=1}^{g}\sum_{j=1}^{n_i}(Y_{ij}^2-2Y_{ij}\bar{Y}_{i.}+\bar{Y}_{i.}^2))}{N-g}$
+
+&emsp;&emsp;&emsp; $=E(\frac{\sum_{i=1}^{g}(\sum_{j=1}^{n_i}Y_{ij}-n_i\bar{Y}_{i.}^2)}{N-g})$
+
+&emsp;&emsp;&emsp; $=\frac{\sum_{i=1}^{g}n_i(u_i^2+\sigma^2-\sum_{i=1}^{g}n_i(u_i^2+\frac{\sigma^2}{n_i}))}{N-g}$
+
+&emsp;&emsp;&emsp; $=\frac{\sum_{i=1}^{g}n_i\sigma^2-\sum_{i=1}^{g}\sigma^2}{N-g}$
+
+&emsp;&emsp;&emsp; $=\sigma^2$
