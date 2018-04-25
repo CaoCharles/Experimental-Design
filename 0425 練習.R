@@ -37,3 +37,4 @@ loss <- function(beta){
 res <- optim(beta0,loss,method = "Nelder-Mead",control = list(maxit = 100))
 cat("直接用AUC訓練",-res$value)
 cat("使用glm函數",CalAUC(y,glm.fit$fitted.values))
+
