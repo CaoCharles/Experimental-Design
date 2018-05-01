@@ -79,7 +79,8 @@ hist(s_d,breaks = 50,main="Histogram of stand error",xlab = "stand error")
 
 ```
 
-# 2.$E\left(\widehat{\sigma}^{2}\right )=\sigma^{2}$
+# 2.
+$E\left(\widehat{\sigma}^{2}\right)=\sigma^{2}$
 
 We know 
  
