@@ -1,5 +1,24 @@
-#實驗設計作業
+---
+title: "Expriment Design Hw5"
+author: "Charles"
+output:
+  html_document:
+    toc: TRUE
+    toc_depth: 5
+    toc_float:
+      collapsed: TRUE
+      smooth_scroll: FALSE
+---
+
+
+```{r}
+library(dplyr)
 library(ggplot2)
+```
+# Exercise 7.1
+Find the smallest sample size giving power of at least .7 when testing equality of six groups at the .05 level when $ζ=4n$.
+
+```{r}
 #7.1
 g = 6                     # 分組
 n = 2                     # 每組個數
@@ -13,12 +32,14 @@ while(power<0.7){
   F = qf(0.95,g-1,N-g)
   power = 1-pf(F,g-1,N-g,4*n)
 }
+```
+```{r}
 n # 每組最小個數
 N # 總樣本數
 power #最小檢定力
 
 #plot
-seq <- seq(0,0.999,by=0.005)
+seq <- seq(0,0.995,by=0.005)
 q <- qf(seq,g-1,N-g) 
 dp <- df(q,g-1,N-g) 
 nq <- qf(seq,g-1,N-g,4*n)
@@ -31,15 +52,21 @@ abline(v=F,col ="#FFFF00",lwd=3)
 data <- cbind(q,dp,nq,ndp)
 colnames(data) <- c("H0_x","H0_y","H1_x","H1_y")
 data <- as.data.frame(data)
-ggplot(data)+ labs(title = "F distribution (central & non-central)",size=40,x="x",y="pdf")+
-  theme(axis.text=element_text(size=12),title=element_text(size=40))+
+ggplot(data)+ labs(title = "F distribution (central & non-central)",size=20,x="x",y="pdf")+
+  theme(axis.text=element_text(size=12),title=element_text(size=20))+
   geom_line(mapping = aes(x=H0_x,y=H0_y),col="#00EE00",lwd=1.5)+
   geom_line(mapping = aes(x=H1_x,y=H1_y),col="#00BBFF",lwd=1.5)+
   geom_vline(mapping = aes(xintercept=F),col="#FF0000",lwd=2,linetype=2)+
-  scale_x_continuous(breaks = c(0:2,F,3:10),labels = c(0:2,"F",3:10),limits = c(0,10))+
+  scale_x_continuous(breaks = c(0:2,F,3:15),labels = c(0:2,"F",3:15))+
   theme(panel.background = element_rect(fill ="#FFFFF0", colour = "black",size = 2))
+```
 
 
+
+# Exercise 7.3
+What is the probability of rejecting the null hypothesis when there are four groups, the sum of the squared treatment effects is 6, the error variance is 3, the group sample sizes are 4, and ε is .01?
+
+```{r}
 #7.3
 g = 4                   # 分組組數
 n = 4                   # 每組個數
@@ -47,7 +74,6 @@ N = 16                  # 總樣本數
 sigma = 3               # error variance
 alphasq = 6             # 給定的處理平方和
 E1 = 0.01               # 顯著水準
-  
 zeta = (alphasq*n)/sigma          # 非中心參數
 F = qf(1-E1,g-1,N-g)              # 虛無假設下之臨界值
 Power = 1-pf(F,g-1,N-g,zeta)      # 檢定力POWER
@@ -65,11 +91,16 @@ ggplot(data)+ labs(title = "F distribution (central & non-central)",size=40,x="x
   theme(axis.text=element_text(size=12),title=element_text(size=20))+
   geom_line(mapping = aes(x=H0x,y=H0y),col="#00EE00",lwd=1.5)+
   geom_line(mapping = aes(x=H1x,y=H1y),col="#00BBFF",lwd=1.5)+
-  geom_vline(mapping = aes(xintercept=F),col="#FF0000",lwd=2,linetype=2)+
-  scale_x_continuous(breaks = c(0:5,F,7:10),labels = c(0:5,"F",7:10),limits = c(0,10))+
+  geom_vline(mapping = aes(xintercept=F),col="#FF0000",lwd=1.7,linetype=2)+
+  scale_x_continuous(breaks = c(0:5,F,7:21),labels = c(0:5,"F",7:21),limits = c(0,21))+
   theme(panel.background = element_rect(fill ="#FFFFF0", colour = "black",size = 2))
+```
 
+# Problem 7.2
+Nondigestible carbohydrates can be used in diet foods, but they may have effects on colonic hydrogen production in humans. We want to test to see if inulin, fructooligosaccharide, and lactulose are equivalent in their hydrogen production. Preliminary data suggest that the treatmentmeans could be about 45, 32, and 60 respectively, with the error variance conservatively estimated at 35. 
+How many subjects do we need to have power .95 for this situation when testing at the $ε_I = .01$ level?
 
+```{r}
 #problem7.2
 n = 2                   # 每組的樣本數
 g = 3                   # 組數
@@ -103,7 +134,11 @@ ggplot(data)+ labs(title = "F distribution (central & non-central)",x="x",y="pdf
   geom_line(mapping = aes(x=H1x,y=H1y),col="#00BBFF",lwd=1.5)+
   geom_vline(mapping = aes(xintercept=F),col="#FF0000",lwd=2,linetype=2)+
   theme(panel.background = element_rect(fill ="#FFFFF0", colour = "black",size = 2))
+```
 
+# Exercise 6.3
+
+```{r}
 # Exercise 6.3
 library(dplyr)
 x  <- c(18.2,16.4,10.0,13.5,13.5,6.7,12.2,18.2,13.5,16.4,
@@ -120,15 +155,4 @@ ggplot(data,aes(A,x))+
 
 # 事後檢定 用Tukey法檢定兩兩之間是否有顯著性差異
 TukeyHSD(aov.data,conf.level=0.95)
-plot(TukeyHSD(aov.data,conf.level=0.95))
-# 常態性檢定
-residuals <- lm(x~.,data)$residuals
-shapiro.test(residuals)
-durbinWatosonTeSt(lm(data = data, formula = x~factor(A)))
-# 獨立性檢定
-A <- table(data)
-chisq.test(table(data))
-chisq.test(A, simulate.p.value = TRUE)
-# 同質性檢定
-bartlett.test(x~A) # 對常態假設敏感
-leveneTest
+```
