@@ -155,4 +155,15 @@ ggplot(data,aes(A,x))+
 
 # 事後檢定 用Tukey法檢定兩兩之間是否有顯著性差異
 TukeyHSD(aov.data,conf.level=0.95)
+plot(TukeyHSD(aov.data,conf.level=0.95))
+# 常態性檢定
+residuals <- lm(x~.,data)$residuals
+shapiro.test(residuals)
+# 獨立性檢定
+a <- table(data)
+chisq.test(table(data))
+chisq.test(a, simulate.p.value = TRUE)
+# 同質性檢定
+bartlett.test(x~A) # 對常態假設敏感
+
 ```
